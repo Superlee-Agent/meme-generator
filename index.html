@@ -4,8 +4,9 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>MemeLee — The Perfect Edition</title>
+<!-- Added Specific Meme Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Impact&family=Montserrat:wght@900&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -22,8 +23,34 @@ body{
   color: #fff;
   -webkit-font-smoothing:antialiased;
 }
+/* --- Landing Page Styles --- */
+#landingPage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: linear-gradient(45deg, #121828, #0a0e1a);
+    transition: opacity 0.5s ease-out;
+}
+#createMemeBtn {
+    font-size: 22px;
+    font-weight: bold;
+    padding: 18px 40px;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    color: #fff;
+    background: var(--gradient-btn);
+    box-shadow: 0 10px 30px rgba(233, 64, 87, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+#createMemeBtn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(242, 113, 33, 0.4);
+}
 
-/* --- Main Editor Styles (visible by default) --- */
+/* --- Main Editor Styles --- */
 #mainEditor {
     display: flex;
     gap: 18px;
@@ -31,6 +58,13 @@ body{
     justify-content: center;
     padding: 18px;
     height: 100%;
+    opacity: 0;
+    transition: opacity 0.5s ease-in;
+    visibility: hidden;
+}
+#mainEditor.visible {
+    opacity: 1;
+    visibility: visible;
 }
 
 .panel{
@@ -102,7 +136,7 @@ label{display:block;margin-top:10px;font-size:13px;color:#e6eefb; font-weight: 5
 }
 select.control {
     -webkit-appearance: none; appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
     background-repeat: no-repeat; background-position: right 12px center;
     padding-right: 30px;
 }
@@ -184,13 +218,15 @@ input[type="file"] { display: none; }
 </head>
 <body>
 
-<!-- Landing page completely removed -->
+<div id="landingPage">
+    <button id="createMemeBtn">Create A Meme</button>
+</div>
 
-<div id="mainEditor" class="visible">
+<div id="mainEditor">
     <div class="panel">
-        <div>
+        <div> <!-- Main controls wrapper -->
             <h1>
-                <img class="site-logo" src="/logo.png" alt="MemeLee logo">
+                <img class="site-logo" src="https://i.postimg.cc/QVZ3YY8M/Picsart-25-09-03-16-47-56-184.png" alt="MemeLee logo">
                 MemeLee <span class="muted">— Pixel Perfect</span>
             </h1>
 
@@ -258,6 +294,8 @@ input[type="file"] { display: none; }
 
 <script>
 // ---------- DOM Refs ----------
+const landingPage = document.getElementById('landingPage');
+const createMemeBtn = document.getElementById('createMemeBtn');
 const mainEditor = document.getElementById('mainEditor');
 const templatesWrap = document.getElementById('templates');
 const uploadInput = document.getElementById('uploadInput');
@@ -274,7 +312,6 @@ const elementControls = document.getElementById('elementControls');
 const textOnlyControls = document.getElementById('textOnlyControls');
 const sizeSlider = document.getElementById('sizeSlider');
 const sizeInput = document.getElementById('sizeInput');
-const stage = document.getElementById('stage'); // ensure defined
 
 let selectedEl = null;
 let elements = [];
@@ -288,18 +325,17 @@ const fontStyles = {
 };
 
 // ---------- Templates ----------
-// Use local assets to avoid CORS when exporting canvas.
 const templates = [
-  { id: 'tpl1', src: '/templates/1756892237569.png', name: 'Template 1' },
-  { id: 'tpl2', src: '/templates/1756892655850.png', name: 'Template 2' },
-  { id: 'tpl3', src: '/templates/1756892807860.png', name: 'Template 3' },
-  { id: 'tpl4', src: '/templates/1756893169751.png', name: 'Template 4' }
+  { id: 'tpl1', src: 'https://i.postimg.cc/tRZ9yWV5/1756892237569.png', name: 'Template 1' },
+  { id: 'tpl2', src: 'https://i.postimg.cc/c1p0JCRN/1756892655850.png', name: 'Template 2' },
+  { id: 'tpl3', src: 'https://i.postimg.cc/SNcqY4dY/1756892807860.png', name: 'Template 3' },
+  { id: 'tpl4', src: 'https://i.postimg.cc/K4Sqhd3d/1756893169751.png', name: 'Template 4' }
 ];
 
 templates.forEach((t,i)=>{
   const d = document.createElement('div');
   d.className = 'tpl' + (i===0? ' selected':'');
-  const img = document.createElement('img'); img.src = t.src; img.alt = t.name;
+  const img = document.createElement('img'); img.src = t.src;
   d.appendChild(img);
   d.addEventListener('click', ()=> {
     document.querySelectorAll('.tpl').forEach(x=>x.classList.remove('selected'));
@@ -308,6 +344,15 @@ templates.forEach((t,i)=>{
   });
   templatesWrap.appendChild(d);
   if(i===0){ bgImage.src = t.src; }
+});
+
+// ---------- App Initialization ----------
+createMemeBtn.addEventListener('click', () => {
+    landingPage.style.opacity = '0';
+    setTimeout(() => {
+        landingPage.style.display = 'none';
+        mainEditor.classList.add('visible');
+    }, 500);
 });
 
 // ---------- Element Creation & Styling ----------
@@ -331,7 +376,6 @@ function createElement(type, options) {
     } else {
         const img = document.createElement('img');
         img.src = options.src;
-        img.alt = 'Layer Image';
         el.appendChild(img);
     }
     
@@ -482,11 +526,12 @@ addImageInput.addEventListener('change', (e) => {
     if (e.target.files && e.target.files[0]) {
         const reader = new FileReader();
         reader.onload = (ev) => {
+            // **FIX STARTS HERE: Calculate aspect ratio before creating element**
             const imgSrc = ev.target.result;
             const img = new Image();
             img.onload = () => {
                 const aspectRatio = img.naturalWidth / img.naturalHeight;
-                const initialWidth = 250;
+                const initialWidth = 250; // A sensible default width
                 const initialHeight = initialWidth / aspectRatio;
                 createElement('image', {
                     src: imgSrc,
@@ -495,6 +540,7 @@ addImageInput.addEventListener('change', (e) => {
                 });
             };
             img.src = imgSrc;
+            // **FIX ENDS HERE**
         };
         reader.readAsDataURL(e.target.files[0]);
     }
@@ -550,7 +596,7 @@ downloadBtn.addEventListener('click', async () => {
     const ctx = canvas.getContext('2d');
     const stageRect = stage.getBoundingClientRect();
     canvas.width = outSize;
-    canvas.height = outSize; // square export
+    canvas.height = outSize * (stageRect.height / stageRect.width);
     const scaleFactor = canvas.width / stageRect.width;
 
     try {
@@ -565,10 +611,7 @@ downloadBtn.addEventListener('click', async () => {
         }
         ctx.fillStyle = '#111'; ctx.fillRect(0,0,canvas.width,canvas.height);
         ctx.drawImage(img, dx, dy, dw, dh);
-    } catch (e) {
-        // Likely no BG set or external CORS issue. Continue with solid BG.
-        ctx.fillStyle = '#111'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    }
+    } catch (e) { console.error("BG image error:", e); }
 
     const sortedElements = elements.slice().sort((a, b) => a.z - b.z);
     for (const el of sortedElements) {
@@ -578,27 +621,25 @@ downloadBtn.addEventListener('click', async () => {
         ctx.translate(centerX, centerY);
         ctx.rotate(el.rotation * Math.PI / 180);
         
+        // Use the element's own scale property for drawing
         const finalWidth = el.width * el.scale * scaleFactor;
         const finalHeight = el.height * el.scale * scaleFactor;
 
         if (el.type === 'text') {
+            ctx.scale(el.scale, el.scale); // Apply scale for text rendering context
             const style = fontStyles[el.fontFamily];
             const fontFamily = el.fontFamily.split(',')[0].replace(/'/g, "");
             const fontSize = el.height * 0.7 * scaleFactor;
             ctx.font = `${style.weight} ${fontSize}px "${fontFamily}", "Arial Black"`;
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.lineWidth = 2.5 * (fontSize / 50);
+            ctx.lineWidth = 2.5 * (fontSize / 50); // Proportional stroke
             ctx.strokeStyle = style.stroke;
             ctx.strokeText(el.content.toUpperCase(), 0, 0);
             ctx.fillStyle = style.color;
             ctx.fillText(el.content.toUpperCase(), 0, 0);
         } else if (el.type === 'image') {
-            try {
-                const img = await loadImage(el.el.querySelector('img').src);
-                ctx.drawImage(img, -finalWidth / 2, -finalHeight / 2, finalWidth, finalHeight);
-            } catch (e) {
-                // skip layer if CORS blocked
-            }
+            const img = await loadImage(el.el.querySelector('img').src);
+            ctx.drawImage(img, -finalWidth / 2, -finalHeight / 2, finalWidth, finalHeight);
         }
         ctx.restore();
     }
@@ -608,15 +649,10 @@ downloadBtn.addEventListener('click', async () => {
     ctx.textAlign = 'right';
     ctx.fillText('Made with MemeLee', canvas.width - (10 * scaleFactor), canvas.height - (10 * scaleFactor));
 
-    try {
-        const dataUrl = canvas.toDataURL('image/png');
-        const a = document.createElement('a');
-        a.href = dataUrl;
-        a.download = 'memelee-pixel-perfect.png';
-        a.click();
-    } catch (err) {
-        alert('Cannot export image due to CORS. Use local /templates images instead of external URLs.');
-    }
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = 'memelee-pixel-perfect.png';
+    a.click();
 });
 </script>
 </body>
